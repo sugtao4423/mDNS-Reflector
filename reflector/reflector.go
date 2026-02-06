@@ -23,6 +23,7 @@ type Reflector struct {
 	interfaces []*net.Interface
 	conns      map[string]*net.UDPConn
 	mu         sync.RWMutex
+	dedup      *dedupCache
 	debug      bool
 
 	ctx        context.Context
@@ -36,6 +37,7 @@ func NewReflector(ifaceNames []string, debug bool) (*Reflector, error) {
 
 	r := &Reflector{
 		conns:  make(map[string]*net.UDPConn),
+		dedup:  newDedupCache(),
 		debug:  debug,
 		ctx:    ctx,
 		cancel: cancel,
@@ -78,6 +80,10 @@ func (r *Reflector) Start() error {
 		r.conns[iface.Name] = conn
 		log.Printf("Joined mDNS multicast group on interface: %s", iface.Name)
 	}
+
+	r.wg.Go(func() {
+		r.dedup.runCleanup(r.ctx)
+	})
 
 	for _, iface := range r.interfaces {
 		r.wg.Go(func() {
@@ -158,6 +164,13 @@ func (r *Reflector) receiveLoop(iface *net.Interface) {
 
 		packet := make([]byte, n)
 		copy(packet, buf[:n])
+
+		if r.dedup.isDuplicate(iface.Name, packet) {
+			if r.debug {
+				log.Printf("Suppressed duplicate %d bytes on %s from %s", n, iface.Name, srcAddr.String())
+			}
+			continue
+		}
 
 		if r.debug {
 			log.Printf("Received %d bytes on %s from %s", n, iface.Name, srcAddr.String())
