@@ -11,8 +11,7 @@ curl -sSL https://github.com/sugtao4423/mDNS-Reflector/releases/latest/download/
 # ARM64
 curl -sSL https://github.com/sugtao4423/mDNS-Reflector/releases/latest/download/mdns-reflector-linux-arm64 -o mdns-reflector
 
-chmod +x mdns-reflector
-sudo mv mdns-reflector /usr/local/bin/
+sudo install -g root -o root -m 0755 mdns-reflector /usr/local/bin/
 ```
 
 ### Build from Source
