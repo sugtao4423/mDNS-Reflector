@@ -2,10 +2,10 @@ package reflector
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
-	"strings"
 	"sync"
 	"time"
 )
@@ -135,10 +135,11 @@ func (r *Reflector) receiveLoop(iface *net.Interface) {
 
 		n, srcAddr, err := conn.ReadFromUDP(buf)
 		if err != nil {
-			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			var netErr net.Error
+			if errors.As(err, &netErr) && netErr.Timeout() {
 				continue
 			}
-			if !strings.Contains(err.Error(), "use of closed network connection") {
+			if !errors.Is(err, net.ErrClosed) {
 				log.Printf("Error reading from %s: %v", iface.Name, err)
 			}
 			return
