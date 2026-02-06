@@ -80,11 +80,9 @@ func (r *Reflector) Start() error {
 	}
 
 	for _, iface := range r.interfaces {
-		r.wg.Add(1)
-		go func(iface *net.Interface) {
-			defer r.wg.Done()
+		r.wg.Go(func() {
 			r.receiveLoop(iface)
-		}(iface)
+		})
 	}
 
 	log.Printf("mDNS Reflector started with %d interfaces", len(r.interfaces))
@@ -165,11 +163,9 @@ func (r *Reflector) receiveLoop(iface *net.Interface) {
 			log.Printf("Received %d bytes on %s from %s", n, iface.Name, srcAddr.String())
 		}
 
-		r.shutdownWg.Add(1)
-		go func(srcIface string, pkt []byte) {
-			defer r.shutdownWg.Done()
-			r.reflect(srcIface, pkt)
-		}(iface.Name, packet)
+		r.shutdownWg.Go(func() {
+			r.reflect(iface.Name, packet)
+		})
 	}
 }
 
