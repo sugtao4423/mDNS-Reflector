@@ -76,6 +76,5 @@ sudo cp mdns-reflector /usr/local/bin/
 sudo cp mdns-reflector.service /etc/systemd/system/
 
 sudo systemctl daemon-reload
-sudo systemctl enable mdns-reflector
-sudo systemctl start mdns-reflector
+sudo systemctl enable --now mdns-reflector
 ```
