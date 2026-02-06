@@ -32,20 +32,20 @@ go build -o mdns-reflector
 Reflect mDNS between two interfaces:
 
 ```bash
-sudo ./mdns-reflector -i eth0,wlan0
+./mdns-reflector -i eth0,wlan0
 ```
 
 Supports three or more interfaces:
 
 ```bash
-sudo ./mdns-reflector -i eth0,eth1,docker0
+./mdns-reflector -i eth0,eth1,docker0
 ```
 
 ### Debug Mode
 Monitor packet forwarding:
 
 ```bash
-sudo ./mdns-reflector -i eth0,wlan0 -d
+./mdns-reflector -i eth0,wlan0 -d
 ```
 
 ## Options
